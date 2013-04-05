@@ -32,15 +32,16 @@ import javax.swing.border.Border;
 @SuppressWarnings("serial")
 public class FilterMain extends JFrame {
 	JTextField inputFile, outputFile;
-	JLabel in, out, blur;
+	JLabel in, out, blur, process;
 	JSlider slider;
 	JButton searchIn, searchOut, filter;
 	JFileChooser chooserIn, chooserOut;
 	JMenuBar menuBar;
 	
 	public FilterMain() {
-		super("Create a PS3 game cover");
-		setContentPane(addWidgets());
+		super("Create a PS3 game cover!");
+		add(addWidgets(), BorderLayout.CENTER);
+		add(process, BorderLayout.PAGE_END);
 	}
 	
 	private JComponent addWidgets() {
@@ -49,9 +50,6 @@ public class FilterMain extends JFrame {
 		panel.setLayout(lm);
 		Border border = BorderFactory.createEmptyBorder(20, 20, 20, 20);
 		panel.setBorder(border);
-		
-		
-		
 
 		chooserIn = new JFileChooser();
 		chooserOut = new JFileChooser();
@@ -61,6 +59,7 @@ public class FilterMain extends JFrame {
 		slider.setPaintTicks(true);
 		slider.setPaintLabels(true);
 		slider.setSnapToTicks(true);
+		process = new JLabel();
 		blur = new JLabel("Choose the blur");
 		in = new JLabel("Choose image for cover");
 		inputFile = new JTextField(5);
@@ -83,7 +82,7 @@ public class FilterMain extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				int ret = chooserOut.showDialog(null, "Save");
 				if (ret == JFileChooser.APPROVE_OPTION)
-					outputFile.setText(chooserOut.getSelectedFile().getAbsolutePath());
+					outputFile.setText(chooserOut.getSelectedFile().getAbsolutePath() + ".jpg");
 				
 			}
 		});
@@ -92,10 +91,13 @@ public class FilterMain extends JFrame {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				SwingUtilities.invokeLater(new Runnable() {
-					
+//				SwingUtilities.invokeLater(new Runnable() {
+				Thread thread = new Thread(new Runnable() {
 					@Override
 					public void run() {
+						process.setText("Processing...");
+						process.setVisible(true);
+						filter.setEnabled(false);
 						int blur = slider.getValue();
 						File file = new File(inputFile.getText());
 						try {
@@ -113,10 +115,17 @@ public class FilterMain extends JFrame {
 						} catch (IOException e1) {
 							e1.printStackTrace();
 						}
+						process.setText("Done!");
+						filter.setEnabled(true);
 					}
 					
 				});
+				thread.start();
+				
+					
+//				});
 			}
+			
 		});
 		panel.add(in);
 		panel.add(inputFile);

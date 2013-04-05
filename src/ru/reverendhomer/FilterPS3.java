@@ -47,7 +47,7 @@ public class FilterPS3 {
 	
 	public void makeCover() throws IOException {
 		blur();
-		if (width > height) addPS3Horizontal();
+		if (width < height) addPS3Horizontal();
 		else addPS3Vertical();
 	}
 	
