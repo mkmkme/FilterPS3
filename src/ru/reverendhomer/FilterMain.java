@@ -189,6 +189,7 @@ public class FilterMain extends JFrame {
 				f.setIconImage(Toolkit.getDefaultToolkit().getImage("icon.png"));
 				f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				f.pack();
+				f.setResizable(false);
 				f.setLocationRelativeTo(null);
 				f.setVisible(true);
 				
