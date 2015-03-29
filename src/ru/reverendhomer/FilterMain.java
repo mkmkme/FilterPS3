@@ -5,7 +5,6 @@ import java.awt.GridLayout;
 import java.awt.LayoutManager;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -64,69 +63,47 @@ public class FilterMain extends JFrame {
 		in = new JLabel("Choose image for cover");
 		inputFile = new JTextField(5);
 		searchIn = new JButton("Search");
-		searchIn.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				int ret = chooserIn.showDialog(null, "Open image");
-				if (ret == JFileChooser.APPROVE_OPTION)
-					inputFile.setText(chooserIn.getSelectedFile().getAbsolutePath());
-			}
-		});
+		searchIn.addActionListener((ActionEvent e) -> {
+                    int ret = chooserIn.showDialog(null, "Open image");
+                    if (ret == JFileChooser.APPROVE_OPTION)
+                        inputFile.setText(chooserIn.getSelectedFile().getAbsolutePath());
+                });
 		out = new JLabel("Path to save a cover:");
 		outputFile = new JTextField(5);
 		searchOut = new JButton("Search");
-		searchOut.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				int ret = chooserOut.showDialog(null, "Save");
-				if (ret == JFileChooser.APPROVE_OPTION)
-					outputFile.setText(chooserOut.getSelectedFile().getAbsolutePath() + ".jpg");
-				
-			}
-		});
+		searchOut.addActionListener((ActionEvent arg0) -> {
+                    int ret = chooserOut.showDialog(null, "Save");
+                    if (ret == JFileChooser.APPROVE_OPTION)
+                        outputFile.setText(chooserOut.getSelectedFile().getAbsolutePath() + ".jpg");
+                });
 		filter = new JButton("Create a cover!");
-		filter.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-//				SwingUtilities.invokeLater(new Runnable() {
-				Thread thread = new Thread(new Runnable() {
-					@Override
-					public void run() {
-						process.setText("Processing...");
-						process.setVisible(true);
-						filter.setEnabled(false);
-						int blur = slider.getValue();
-						File file = new File(inputFile.getText());
-						try {
-							BufferedImage image = ImageIO.read(file);
-							FilterPS3 filter = new FilterPS3(image, blur);
-							BufferedImage result = new BufferedImage(filter.width, filter.height, BufferedImage.TYPE_INT_RGB);
-							filter.makeCover();
-							for (int i = 0; i < filter.width; i++) {
-								for (int j = 0; j < filter.height; j++) {
-									result.setRGB(i, j, filter.pixels[i][j].getRGB());
-								}
-							}
-							File file2 = new File(outputFile.getText());
-							ImageIO.write(result, "jpg", file2);
-						} catch (IOException e1) {
-							e1.printStackTrace();
-						}
-						process.setText("Done!");
-						filter.setEnabled(true);
-					}
-					
-				});
-				thread.start();
-				
-					
-//				});
-			}
-			
-		});
+		filter.addActionListener((ActionEvent e) -> {
+                    Thread thread;
+                    thread = new Thread(() -> {
+                        process.setText("Processing...");
+                        process.setVisible(true);
+                        filter.setEnabled(false);
+                        int blur1 = slider.getValue();
+                        File file = new File(inputFile.getText());
+                        try {
+                            BufferedImage image = ImageIO.read(file);
+                            FilterPS3 filter1 = new FilterPS3(image, blur1);
+                            BufferedImage result = new BufferedImage(filter1.width, filter1.height, BufferedImage.TYPE_INT_RGB);
+                            filter1.makeCover();
+                            for (int i = 0; i < filter1.width; i++) {
+                                for (int j = 0; j < filter1.height; j++) {
+                                    result.setRGB(i, j, filter1.pixels[i][j].getRGB());
+                                }
+                            }
+                            File file2 = new File(outputFile.getText());
+                            ImageIO.write(result, "jpg", file2);
+                        }catch (IOException e1) {
+                        }
+                        process.setText("Done!");
+                        filter.setEnabled(true);
+                    });
+                    thread.start();
+                });
 		panel.add(in);
 		panel.add(inputFile);
 		panel.add(searchIn);
@@ -140,60 +117,50 @@ public class FilterMain extends JFrame {
 	}
 
 	public static void main(String[] args) throws IOException {
-		SwingUtilities.invokeLater(new Runnable() {
-			
-			@Override
-			public void run() {
-				JMenuBar menuBar = new JMenuBar();
-				JMenu menu = new JMenu("Help");
-				JMenuItem item = new JMenuItem("About");
-				menu.add(item);
-				item.addActionListener(new ActionListener() {
-					
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						SwingUtilities.invokeLater(new Runnable() {
-							
-							@Override
-							public void run() {
-								JFrame aboutFrame = new JFrame("About");
-								JPanel about = new JPanel();
-								LayoutManager manager = new BorderLayout();
-								about.setLayout(manager);
-								JLabel copyright, image;
-								JTextArea program;
-								ImageIcon icon = new ImageIcon("icon.png");
-								image = new JLabel(icon);
-								copyright = new JLabel("© Преподобный Гомер", SwingConstants.RIGHT);
-								program = new JTextArea("Create your PS3 game cover! v 0.1\n" +
-										"Программа получает на вход изображение,\n" +
-										" затем применяет к нему размытие и вертикальную/горизонтальную\n" +
-										"наклейку (в зависимости от соотношения сторон изображения.)");
-								program.setEditable(false);
-								about.add(image, BorderLayout.PAGE_START);
-								about.add(program, BorderLayout.CENTER);
-								about.add(copyright, BorderLayout.PAGE_END);
-								aboutFrame.setContentPane(about);
-								aboutFrame.setIconImage(Toolkit.getDefaultToolkit().getImage("icon.png"));
-								aboutFrame.pack();
-								aboutFrame.setLocationRelativeTo(null);
-								aboutFrame.setVisible(true);
-							}
-						});
-					}
-				});
-				menuBar.add(menu);
-				
-				FilterMain f = new FilterMain();
-				f.setJMenuBar(menuBar);
-				f.setIconImage(Toolkit.getDefaultToolkit().getImage("icon.png"));
-				f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				f.pack();
-				f.setResizable(false);
-				f.setLocationRelativeTo(null);
-				f.setVisible(true);
-				
-			}
-		});
+		SwingUtilities.invokeLater(() -> {
+                    JMenuBar menuBar1 = new JMenuBar();
+                    JMenu menu = new JMenu("Help");
+                    JMenuItem item = new JMenuItem("About");
+                    menu.add(item);
+                    item.addActionListener((ActionEvent e) -> {
+                        SwingUtilities.invokeLater(new Runnable() {
+                            
+                            @Override
+                            public void run() {
+                                JFrame aboutFrame = new JFrame("About");
+                                JPanel about = new JPanel();
+                                LayoutManager manager = new BorderLayout();
+                                about.setLayout(manager);
+                                JLabel copyright, image;
+                                JTextArea program;
+                                ImageIcon icon = new ImageIcon("icon.png");
+                                image = new JLabel(icon);
+                                copyright = new JLabel("© Преподобный Гомер", SwingConstants.RIGHT);
+                                program = new JTextArea("Create your PS3 game cover! v 0.1\n" +
+                                        "Программа получает на вход изображение,\n" +
+                                        " затем применяет к нему размытие и вертикальную/горизонтальную\n" +
+                                        "наклейку (в зависимости от соотношения сторон изображения.)");
+                                program.setEditable(false);
+                                about.add(image, BorderLayout.PAGE_START);
+                                about.add(program, BorderLayout.CENTER);
+                                about.add(copyright, BorderLayout.PAGE_END);
+                                aboutFrame.setContentPane(about);
+                                aboutFrame.setIconImage(Toolkit.getDefaultToolkit().getImage("icon.png"));
+                                aboutFrame.pack();
+                                aboutFrame.setLocationRelativeTo(null);
+                                aboutFrame.setVisible(true);
+                            }
+                        });
+                    });
+                    menuBar1.add(menu);
+                    FilterMain f = new FilterMain();
+                    f.setJMenuBar(menuBar1);
+                    f.setIconImage(Toolkit.getDefaultToolkit().getImage("icon.png"));
+                    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                    f.pack();
+                    f.setResizable(false);
+                    f.setLocationRelativeTo(null);
+                    f.setVisible(true);
+                });
 	}
 }

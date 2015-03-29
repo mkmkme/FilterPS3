@@ -52,8 +52,7 @@ public class FilterPS3 {
 	}
 	
 	public void addPS3Horizontal() throws IOException {
-		File f = new File("PS3Horizontal.jpg");
-		BufferedImage ps3 = ImageIO.read(f);
+		BufferedImage ps3 = ImageIO.read(new File("PS3Horizontal.jpg"));
 		int ps3width = ps3.getWidth();
 		int ps3height = ps3.getHeight();
 		double step = (double)ps3width / (double)width;
